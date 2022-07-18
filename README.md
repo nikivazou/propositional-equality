@@ -1,4 +1,4 @@
-# Code for Haskell'22 submission #40: How to Safely Use Extensionality in Liquid Haskell
+# Code for Haskell'22 paper: How to Safely Use Extensionality in Liquid Haskell
 
 - `propositional-equality` contains the code from sections 2, 3, and 4.
    To use Liquid Haskell to check all the code, run `stack test`. 
