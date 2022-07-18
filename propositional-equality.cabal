@@ -1,0 +1,49 @@
+cabal-version: 1.12
+name:           propositional-equality
+version:        0.1.0.0
+license:        MIT
+license-file:   LICENSE
+build-type:     Simple
+
+source-repository head
+  type: git
+
+library
+  exposed-modules:
+      Relation.Equality.Prop
+      Data.Refined.Constant
+      Data.Refined.Unit
+      Function
+  hs-source-dirs:
+      src
+  default-extensions: TupleSections MultiWayIf LambdaCase GADTs KindSignatures ExplicitForAll RankNTypes FlexibleInstances UndecidableInstances MultiParamTypeClasses
+  ghc-options: -fplugin=LiquidHaskell -fplugin-opt=LiquidHaskell:--reflection -fplugin-opt=LiquidHaskell:--ple-local    
+  build-depends:
+      liquid-base
+    , liquidhaskell
+    , liquid-prelude
+  default-language: Haskell2010
+
+
+test-suite test
+  type: exitcode-stdio-1.0
+  main-is: Test.hs
+  other-modules:
+      Inconsistency
+      Reverse
+      RefinedDomains
+      Map
+      Folds
+      RunTimeCheck
+      Endofunctors
+      Readers
+  hs-source-dirs:
+      test
+  ghc-options: -fplugin=LiquidHaskell -fplugin-opt=LiquidHaskell:--reflection -fplugin-opt=LiquidHaskell:--ple-local 
+  -- default-extensions: IncoherentInstances
+  build-depends:
+      liquid-base
+    , liquidhaskell
+    , liquid-prelude
+    , propositional-equality
+  default-language: Haskell2010
