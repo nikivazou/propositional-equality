@@ -1,102 +1,70 @@
 module Relation.Equality.Prop where
 
-import Data.Refined.Constant
-import Data.Refined.Unit
-import Data.Void
-import Function
 import Language.Haskell.Liquid.ProofCombinators
+import Misc 
 
-{-
-# Extra definitions to port old code
--}
+-------------------------------------------------------------------------------
+-- | Axiomatized Equality -----------------------------------------------------
+-------------------------------------------------------------------------------
 
-infixl 3 =~=
+class AEq a where
+  bEq :: a -> a -> Bool
+  reflP :: a -> ()
+  symmP :: a -> a -> ()
+  transP :: a -> a -> a -> ()
+  smtP :: a -> a -> () -> ()
 
-(=~=) :: a -> a -> a
-_ =~= y = y
+{-@ measure bbEq :: a -> a -> Bool @-}
+{-@ class AEq a where
+     bEq    :: x:a -> y:a -> {v:Bool | v <=> bbEq x y }
+     reflP  :: x:a -> {bbEq x x}
+     symmP  :: x:a -> y:a -> { bbEq x y => bbEq y x }
+     transP :: x:a -> y:a -> z:a -> { ( bbEq x y && bbEq y z) => bbEq x z }
+     smtP   :: x:a -> y:a -> {v:() | bbEq x y} -> {x = y} @-}
 
--- Hacks with Abstract Refinement to preserve domains
-eqSMT' :: a -> a -> EqualityProp a -> EqualityProp a
-{-@ ignore eqSMT' @-}
-{-@ assume eqSMT' :: forall <p :: a -> Bool>.
-       x:a<p> -> y:a<p> ->
-      EqualProp (a) {x} {y} ->
-      EqualProp (a<p>) {x} {y}
-@-}
-eqSMT' _ _ p = p
 
+
+-------------------------------------------------------------------------------
+-- | Proppotisional Equality --------------------------------------------------
+-------------------------------------------------------------------------------
+
+-- (1) Plain Haskell Definitions 
+data EqualityProp a = EqualityProp
+
+baseEq :: a -> a -> () -> EqualityProp a
+baseEq _ _ _ = EqualityProp
+
+extensionality :: (a -> b) -> (a -> b) -> (a -> EqualityProp b) -> EqualityProp (a -> b)
+extensionality _ _ _ = EqualityProp
+
+substitutability :: (a -> b) -> a -> a -> EqualityProp a -> EqualityProp b
+substitutability _ _ _ _ = EqualityProp
+
+-- (2) Uninterpreted Equality 
+{-@ type EqualProp a X Y = {w:EqualityProp a | eqprop X Y} @-}
+{-@ type PEq a X Y       = {w:EqualityProp a | eqprop X Y} @-}
+{-@ measure eqprop :: a -> a -> Bool @-}
+
+-- (3) Axiomatization of Equal Prop 
+
+{-@ assume baseEq :: AEq a => x:a -> y:a -> {v:() | bbEq x y } -> EqualProp a {x} {x} @-}
+
+{-@ assume extensionality :: f:(a -> b) -> g:(a -> b) 
+                          -> (x:a -> EqualProp b {f x} {g x})
+                          -> EqualProp (a -> b) {f} {g} @-}
+
+{-@ assume substitutability :: f:(a -> b) -> x:a -> y:a -> EqualProp a {x} {y} -> EqualProp b {f x} {f y} @-}
+
+
+
+-- Abstract refinements to permit reasoning about the function domains 
 {-@ ignore deqFun @-}
 {-@ deqFun :: forall<p :: a -> b -> Bool>. f:(a -> b) -> g:(a -> b)
           -> (x:a -> EqualProp b<p x> {f x} {g x}) -> EqualProp (y:a -> b<p y>) {f} {g}  @-}
 deqFun :: (a -> b) -> (a -> b) -> (a -> EqualityProp b) -> EqualityProp (a -> b)
 deqFun = extensionality
 
-{-
-# END OF Extra definitions to port old code
--}
 
-{-
-# Propositional Equality
--}
-
-{-
-## Definition
--}
-
-{-@
-measure eqprop :: a -> a -> Bool
-@-}
-
-data EqualityProp a = EqualityProp
-
-{-@
-type EqualProp a X Y = {w:EqualityProp a | eqprop X Y}
-@-}
-
--- NV suggests to keep the below
-{-@
-type PEq a X Y = {w:EqualityProp a | eqprop X Y}
-@-}
-
-{-@
-type NEqualProp a X Y = EqualProp a {X} {Y} -> Void
-@-}
-
-assumedProp :: EqualityProp a
-assumedProp = EqualityProp
-
-{-
-### Axioms
--}
-
-{-
-{-@ assume
-reflexivity :: x:a -> EqualProp a {x} {x}
-@-}
-reflexivity :: a -> EqualityProp a
-reflexivity x = EqualityProp
--}
-
-{-@ assume
-baseEq :: AEq a => x:a -> y:a -> {v:() | bbEq x y } -> EqualProp a {x} {x}
-@-}
-baseEq :: a -> a -> () -> EqualityProp a
-baseEq _ _ _ = EqualityProp
-
-{-@ assume
-extensionality ::
-  f:(a -> b) -> g:(a -> b) ->
-  (x:a -> EqualProp b {f x} {g x}) ->
-  EqualProp (a -> b) {f} {g}
-@-}
-extensionality :: (a -> b) -> (a -> b) -> (a -> EqualityProp b) -> EqualityProp (a -> b)
-extensionality f g pf = EqualityProp
-
-{-@ assume
-substitutability :: f:(a -> b) -> x:a -> y:a -> EqualProp a {x} {y} -> EqualProp b {f x} {f y}
-@-}
-substitutability :: (a -> b) -> a -> a -> EqualityProp a -> EqualityProp b
-substitutability f x y pf = EqualityProp
 
 {-@ eqRTCtx :: x:a -> y:a -> EqualProp a {x} {y} -> f:(a -> b) -> EqualProp b {f x} {f y} @-}
 eqRTCtx :: a -> a -> EqualityProp a -> (a -> b) -> EqualityProp b
@@ -149,14 +117,12 @@ class Equality a where
 -}
 
 {-@
-class EqSMT a where
+class AEq a => EqSMT a where
   eqSMT :: x:a -> y:a -> {b:Bool | ((x = y) => b) && (b => (x = y))}
 @-}
-class EqSMT a where
+class AEq a => EqSMT a where
   eqSMT :: a -> a -> Bool
 
-instance Eq a => EqSMT a where
-  eqSMT = (==)
 
 {-
 ### Concreteness
@@ -203,7 +169,7 @@ retractability f g efg x =
     ? (given x (g)) -- instantiate `g x`
 
 {-
-### Symmetry'
+### Symmetry
 -}
 
 {-@
@@ -224,7 +190,7 @@ instance (Symmetry b) => Symmetry (a -> b) where
      in extensionality g f egxfx
 
 {-
-### Transitivity'
+### Transitivity
 -}
 
 {-@
@@ -247,28 +213,10 @@ instance Transitivity b => Transitivity (a -> b) where
         es_fx_hx x = trans (f x) (g x) (h x) (es_fx_gx x) (es_gx_hx x)
      in extensionality f h es_fx_hx
 
-{-
-## Lemmas
--}
 
-{-@
-alphaEquivalency :: Equality b => f:(a -> b) -> EqualProp (a -> b) {f} {apply (\x:a -> f x)}
-@-}
-alphaEquivalency :: Equality b => (a -> b) -> EqualityProp (a -> b)
-alphaEquivalency f =
-  extensionality f (apply (\x -> f x)) $ \y ->
-    reflexivity (f y) ? apply (\x -> f x) y
-
-{-@
-etaEquivalency :: Equality b => x:a -> y:b -> EqualProp b {y} {apply (\_:a -> y) x}
-@-}
-etaEquivalency :: Equality b => a -> b -> EqualityProp b
-etaEquivalency x y =
-  reflexivity y ? apply (\_ -> y) x
-
-{-
-## Basic instances
--}
+-------------------------------------------------------------------------------
+-- | Bsaic Instancts ----------------------------------------------------------
+-------------------------------------------------------------------------------
 
 instance Equality Bool where
   symmetry = undefined
@@ -285,30 +233,13 @@ instance Equality () where
   transitivity = undefined
   reflexivity = undefined
 
----------------------------------------------------------------------------------------------------------------------------------------
-
--- | Axiomatized Equality -------------------------------------------------------------------------------------------------------------
-
----------------------------------------------------------------------------------------------------------------------------------------
-
-class AEq a where
-  bEq :: a -> a -> Bool
-  reflP :: a -> ()
-  symmP :: a -> a -> ()
-  transP :: a -> a -> a -> ()
-  smtP :: a -> a -> () -> ()
-
-{-@ measure bbEq :: a -> a -> Bool @-}
-{-@ class AEq a where
-     bEq    :: x:a -> y:a -> {v:Bool | v <=> bbEq x y }
-     reflP  :: x:a -> {bbEq x x}
-     symmP  :: x:a -> y:a -> { bbEq x y => bbEq y x }
-     transP :: x:a -> y:a -> z:a -> { ( bbEq x y && bbEq y z) => bbEq x z }
-     smtP   :: x:a -> y:a -> {v:() | bbEq x y} -> {x = y}
-@-}
-
 instance Reflexivity Integer where
   refl x = baseEq x x (reflP x)
+
+
+-------------------------------------------------------------------------------
+-- | Assumed Instances of Axiomatized Equality --------------------------------
+-------------------------------------------------------------------------------
 
 instance AEq Integer where
   bEq = bEqInteger
@@ -323,6 +254,13 @@ instance AEq Bool where
   symmP x y = () `const` (bEqBool x y)
   transP x y _ = () `const` (bEqBool x y)
   smtP x y _ = () `const` (bEqBool x y)
+
+instance EqSMT Integer where 
+  eqSMT = bEqInteger
+
+instance EqSMT Bool where 
+  eqSMT = bEqBool
+
 
 {-@ assume bEqInteger :: x:Integer -> y:Integer -> {v:Bool | (v <=> bbEq x y) && (v <=> x = y)} @-}
 bEqInteger :: Integer -> Integer -> Bool

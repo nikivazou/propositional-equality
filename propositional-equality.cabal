@@ -10,6 +10,8 @@ source-repository head
 
 library
   exposed-modules:
+      Misc 
+      ProofCombinators
       Relation.Equality.Prop
   hs-source-dirs:
       src

@@ -3,8 +3,6 @@ module RefinedDomains where
 {-@ LIQUID "--ple" @-}
 
 import Relation.Equality.Prop 
--- import Language.Haskell.Liquid.ProofCombinators
-import Data.Refined.Unit
 
 --------------------------------------------------------------------------------
 -- | Main theorem

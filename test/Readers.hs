@@ -8,9 +8,8 @@
 
 module Readers where
 
-import Data.Refined.Unit
-import Function hiding (compose)
-import Language.Haskell.Liquid.ProofCombinators
+import Misc hiding (compose)
+import ProofCombinators
 import Relation.Equality.Prop
 import Prelude hiding (fmap, id, pure, (<$>), (<*>), (>>=))
 

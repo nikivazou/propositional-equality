@@ -4,9 +4,8 @@
 
 module Folds where
 
-import Data.Refined.Unit
-import Function
-import Language.Haskell.Liquid.ProofCombinators
+import Misc
+import ProofCombinators
 import Relation.Equality.Prop
 import Prelude hiding (foldl, foldr, id)
 

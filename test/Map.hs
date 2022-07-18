@@ -5,9 +5,8 @@
 
 module Map where
 
-import Data.Refined.Unit
-import Function hiding (map)
-import Language.Haskell.Liquid.ProofCombinators
+import Misc hiding (map)
+import ProofCombinators
 import RefinedDomains
 import Relation.Equality.Prop
 import Prelude hiding (foldl, foldr, id, map)

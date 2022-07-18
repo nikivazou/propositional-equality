@@ -1,13 +1,12 @@
 module Inconsistency where 
 
-import Function 
+import Misc 
 import Relation.Equality.Prop
-import Data.Refined.Unit 
-import Language.Haskell.Liquid.ProofCombinators
+import ProofCombinators
 
 import Prelude hiding (map)
 
--- | Seciton 2: Functional extensionality is inconsistent in Refinement Types 
+-- | Section 2: Functional extensionality is inconsistent in Refinement Types 
 
 {-@ assume funExt :: f:(a -> b) -> g:(a -> b) -> (x:a -> {f x = g x}) -> {f = g} @-}
 funExt :: (a -> b) -> (a -> b) -> (a -> ()) -> ()

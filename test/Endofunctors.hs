@@ -8,9 +8,8 @@ module Endofunctors where
 
 -- macros
 
-import Data.Refined.Unit
-import Function
-import Language.Haskell.Liquid.ProofCombinators
+import Misc
+import ProofCombinators
 import Relation.Equality.Prop
 import Prelude hiding (id, mappend, mempty)
 
@@ -66,3 +65,4 @@ monoid_associativity x y z =
             =~= mappend x (mappend y z) a
             *** QED
         )
+
