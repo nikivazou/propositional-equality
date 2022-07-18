@@ -1,4 +1,4 @@
-# Supplementary matterial for Haskell'22 submission #40: How to Safely Use Extensionality in Liquid Haskell
+# Code for Haskell'22 submission #40: How to Safely Use Extensionality in Liquid Haskell
 
 - `proofs-and-definitions.pdf` contains the missing definitions and proofs from section 5. 
 
