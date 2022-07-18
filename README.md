@@ -1,7 +1,5 @@
 # Code for Haskell'22 submission #40: How to Safely Use Extensionality in Liquid Haskell
 
-- `proofs-and-definitions.pdf` contains the missing definitions and proofs from section 5. 
-
 - `propositional-equality` contains the code from sections 2, 3, and 4.
    To use Liquid Haskell to check all the code, run `stack test`. 
    
