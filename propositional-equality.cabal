@@ -11,9 +11,6 @@ source-repository head
 library
   exposed-modules:
       Relation.Equality.Prop
-      Data.Refined.Constant
-      Data.Refined.Unit
-      Function
   hs-source-dirs:
       src
   default-extensions: TupleSections MultiWayIf LambdaCase GADTs KindSignatures ExplicitForAll RankNTypes FlexibleInstances UndecidableInstances MultiParamTypeClasses
